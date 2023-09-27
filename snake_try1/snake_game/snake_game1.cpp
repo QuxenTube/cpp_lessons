@@ -3,43 +3,26 @@
 
 using namespace std;
 
-
-void create(int scale) {
-			constexpr size_t rows = scale;
-			return 0;
-}
-
 int main() {
-
 	
 	// SETTINGS
-
-	//const int scale = 1;
-	
 	cout << "Enter game scale:" << endl;
 	int scale;
 	cin >> scale;
-	//create(scale);
-
-	int w;
-	int h;
-	//constexpr size_t scale = 20;
-	cin >> h;
-	//cin >> constexpr size_t scale;
 
 	cout << "Entered value is: " << scale << endl;
-	cout << "Entered value is: " << h << endl;
+	//cout << rows[scale][scale] << endl;
 
 	// CORE
 
-	int arr[scale][scale];
+	int arr[10][10];
 
 	for (int i = 0; i < scale; i++)
 	{
 		for (int j = 0; j < scale; j++) {
 			arr[i][j] = rand() % 100;
 
-			cout << arr[i][j];
+			cout << arr[i][j] << " ";
 		}
 		cout << endl;
 	}
