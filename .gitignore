@@ -35,8 +35,8 @@
 
 .vs/
 
-*.vcxproj
-*.user
-*.filters
+#*.vcxproj
+#*.user
+#*.filters
 x64/
 Debug/

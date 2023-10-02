@@ -8,10 +8,10 @@
 using namespace std;
 
 int main()
-{   
+{
     int arr[7];
-    for (int i = 0 ; i < 7; i++) {
-        cout << "Enter " << i+1 << "-number." << endl;
+    for (int i = 0; i < 7; i++) {
+        cout << "Enter " << i + 1 << "-number." << endl;
         cin >> arr[i];
     }
     for (int j = 1; j < 8; j++) {
