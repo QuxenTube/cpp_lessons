@@ -1,0 +1,6 @@
+lesson 11
+implement deleting element(s) from the file,
+ replacing element(s), searching for elements,
+ deleting elements, copying elements,
+ sorting (by all types) 
++ write the logic for auto-sorting elements (with the definition of the optimal algorithm in each case)
