@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 #include <Windows.h>
@@ -43,7 +43,7 @@ struct Book {
     int year;
 
 public:
-    void initialize(int _id, char* _title, const char* _author, int _year) {
+    void initialize(int _id, const char* _title, const char* _author, int _year) {
         id = _id;
 
         title = new char[strlen(_title) + 1];
@@ -62,15 +62,14 @@ public:
 
         year = _year;
     }
-    // деструктор тут не надо
-    /*~Book() {
+    ~Book() {
         delete[] title;
         delete[] author;
-    }*/
+    }
 };
 
 
-// Work
+// try work
 void loadBooks(Book*& books, int& count) {
     std::ifstream file("books.txt", std::ios::in);
     if (!file.is_open()) {
@@ -82,9 +81,20 @@ void loadBooks(Book*& books, int& count) {
     file.getline(header, sizeof(header));
 
     count = 0;
+    Book* newBooks;
     while (file) {
 
+        newBooks = new Book[++count];
+
+        // Manually copy the contents
+        for (int i = 0; i < count - 1; i++) {
+            newBooks[i] = books[i];
+        }
+
+        //newBooks[count-1] = Book();
+        //Book& newBook = newBooks[count-1];
         Book newBook;
+
 
         // Read ID
         file >> newBook.id;
@@ -113,21 +123,32 @@ void loadBooks(Book*& books, int& count) {
 
         // Read year
         file >> newBook.year;
-
-        Book* newBooks;
-        newBooks = new Book[++count];
-
-        // Manually copy the contents
-        for (int i = 0; i < count - 1; i++) {
-            newBooks[i] = books[i];
-        }
-
         newBooks[count - 1] = newBook;
 
 
         if (count != 1) { delete[] books; };
 
-        books = newBooks;
+        //books = newBooks;
+        Book temp;
+        for (i = 0; i < count; i++) {
+            temp = newBooks[i];
+            books[i] = temp;
+            // Copy elements if books is already allocated
+        }
+
+        //if (count > 0) {
+        //    if (books) {
+        //        for (int j = 0; j < count - 1; j++) {
+        //            books[j] = Book(newBooks[j]); // Copy elements if books is already allocated
+        //        }
+        //    }
+        //    else {
+        //        books = Book(newBooks); // Assign newBooks to books if books is not yet allocated
+        //    }
+        //}
+
+        //newBooks = nullptr;
+        //++count;
     }
 
     file.close();
@@ -155,14 +176,22 @@ bool book_isIdExists(const Book books[], int count, int idToCheck) {
 
 
 void addBook(Book*& books, int& count) {
-    
+    Book* newBooks = new Book[++count];
+
+    // Manually copy the contents
+    for (int i = 0; i < count - 1; i++) {
+        newBooks[i] = books[i];
+    }
+
+    //newBooks[count-1] = Book();
+    //Book& newBook = newBooks[count-1];
     Book newBook;
-    
+
 
     int idInput = 0;
-    std::cout << "Enter book ID (0 for a random ID): ";
-    std::cin >> idInput;
     do {
+        std::cout << "Enter ID (0 for a random ID): ";
+        std::cin >> idInput;
 
         if (idInput != 0) {
             // Use the provided ID as an integer
@@ -174,13 +203,7 @@ void addBook(Book*& books, int& count) {
         }
         else {
             // If ID is not provided, generate a random ID
-            bool checker = true;
-            int id_try;
-            while (checker) {
-                id_try = rand() % 1000;
-                checker = book_isIdExists(books, count, id_try);
-            }
-            newBook.id = id_try;
+            newBook.id = rand() % 1000;
             std::cout << "Random ID generated: " << newBook.id << std::endl;
         }
     } while (book_isIdExists(books, count, newBook.id));
@@ -214,20 +237,17 @@ void addBook(Book*& books, int& count) {
     std::cout << "Enter year: ";
     std::cin >> newBook.year;
 
-    Book* newBooks;
-    newBooks = new Book[++count];
-
-    // Manually copy the contents
-    for (int i = 0; i < count - 1; i++) {
-        newBooks[i] = books[i];
-    }
-
     newBooks[count - 1] = newBook;
 
+
     if (count != 1) { delete[] books; };
+    //books = newBooks;
+    for (i = 0; i < count; i++) {
+        books[i] = newBooks[i];
+    }
+    delete[] newBooks;
 
-    books = newBooks;
-
+    //++count;
     saveBooks(books, count);
     std::cout << "Book added successfully." << std::endl;
 }
@@ -252,15 +272,15 @@ void deleteBook(Book*& books, int& count, int bookId) {
             books[i] = books[i + 1];
         }
 
-            Book* newBooks = new Book[--count];
+        Book* newBooks = new Book[--count];
 
-            // Manually copy the contents
-            for (int i = 0; i < count; ++i) {
-                newBooks[i] = books[i];
-            }
+        // Manually copy the contents
+        for (int i = 0; i < count; ++i) {
+            newBooks[i] = books[i];
+        }
 
-            delete[] books;
-            books = newBooks;
+        delete[] books;
+        books = newBooks;
 
         saveBooks(books, count);
         std::cout << "Book deleted successfully." << std::endl;
@@ -308,12 +328,11 @@ public:
         }
         time_user[i] = '\0'; // Ensure null-terminated
     }
-    // деструктор тут не надо
-    /*~User() {
+    ~User() {
         delete[] name;
         delete[] surname;
         delete[] time_user;
-    }*/
+    }
 };
 
 //try work
@@ -328,67 +347,45 @@ void loadUsers(User*& users, int& count) {
     file.getline(header, sizeof(header));
 
     count = 0;
-    while (file) {
-
-        User newUser;
-
-        // Read ID
-        file >> newUser.id;
-        if (!file) break;  // Check for EOF
-
-        file.ignore(); // Ignore the comma
+    while (file >> users[count].id) {
+        int i = 0;
 
         // Read name
         char bufferName[256];
         file.getline(bufferName, sizeof(bufferName), ',');
-        newUser.name = new char[strlen(bufferName) + 1];
-        int i = 0;
+        users[count].name = new char[strlen(bufferName) + 1];
         for (i = 0; bufferName[i] != '\0'; ++i) {
-            newUser.name[i] = bufferName[i];
+            users[count].name[i] = bufferName[i];
         }
-        newUser.name[i] = '\0'; // Ensure null-terminated
+        users[count].name[i] = '\0'; // Ensure null-terminated
 
         // Read surname
         char bufferSurname[256];
         file.getline(bufferSurname, sizeof(bufferSurname), ',');
-        newUser.surname = new char[strlen(bufferSurname) + 1];
+        users[count].surname = new char[strlen(bufferSurname) + 1];
         for (i = 0; bufferSurname[i] != '\0'; ++i) {
-            newUser.surname[i] = bufferSurname[i];
+            users[count].surname[i] = bufferSurname[i];
         }
-        newUser.surname[i] = '\0'; // Ensure null-terminated
+        users[count].surname[i] = '\0'; // Ensure null-terminated
 
         // Read age
-        file >> newUser.age;
+        file >> users[count].age;
 
         // Read book id
-        file >> newUser.book_id;
+        file >> users[count].book_id;
 
         // Read time
 
         char bufferTime_user[256];
         file.getline(bufferTime_user, sizeof(bufferTime_user), ',');
-        newUser.time_user = new char[strlen(bufferTime_user) + 1];
+        users[count].time_user = new char[strlen(bufferTime_user) + 1];
 
         for (i = 0; bufferTime_user[i] != '\0'; ++i) {
-            newUser.time_user[i] = bufferTime_user[i];
+            users[count].time_user[i] = bufferTime_user[i];
         }
-        newUser.time_user[i] = '\0'; // Ensure null-terminated
+        users[count].time_user[i] = '\0'; // Ensure null-terminated
 
-        User* newUsers;
-        newUsers = new User[++count];
-
-        // Manually copy the contents
-        for (int i = 0; i < count - 1; i++) {
-            newUsers[i] = users[i];
-        }
-
-        newUsers[count - 1] = newUser;
-
-
-        if (count != 1) { delete[] users; };
-
-        users = newUsers;
-
+        ++count;
     }
 
     file.close();
@@ -404,51 +401,19 @@ void saveUsers(User users[], int count) {
     file.close();
 }
 
-bool user_isIdExists(const User users[], int count, int idToCheck) {
-    for (int i = 0; i < count; ++i) {
-        if (users[i].id == idToCheck) {
-            return true; // ID already exists
-        }
-    }
-    return false; // ID does not exist
-}
 
-void addUser(User*& users, int& count) {
-
+void addUser(User users[], int& count) {
     User newUser;
 
-    int idInput = 0;
-    std::cout << "Enter user ID (0 for a random ID): ";
-    std::cin >> idInput;
-    do {
-
-        if (idInput != 0) {
-            // Use the provided ID as an integer
-            if (user_isIdExists(users, count, idInput)) {
-                std::cout << "Error: ID already exists. Exiting." << std::endl;
-                return;
-            }
-            newUser.id = idInput;
-        }
-        else {
-            // If ID is not provided, generate a random ID
-            bool checker = true;
-            int id_try;
-            while (checker) {
-                id_try = rand() % 1000;
-                checker = user_isIdExists(users, count, id_try);
-            }
-            newUser.id = id_try;
-            std::cout << "Random ID generated: " << newUser.id << std::endl;
-        }
-    } while (user_isIdExists(users, count, newUser.id));
+    // Incrementing userCount to get a unique ID
+    newUser.initialize(count + 1, "", "", 0, 0, "");
 
     std::cout << "Enter name: ";
     char bufferName[256];
     std::cin.ignore(); // Clear the buffer
     std::cin.getline(bufferName, sizeof(bufferName));
 
-    // User name
+    // Allocate memory for name and copy the content
     newUser.name = new char[strlen(bufferName) + 1];
     int i = 0;
     while (bufferName[i] != '\0') {
@@ -461,7 +426,7 @@ void addUser(User*& users, int& count) {
     char bufferSurname[256];
     std::cin.getline(bufferSurname, sizeof(bufferSurname));
 
-    // User surname
+    // Allocate memory for surname and copy the content
     newUser.surname = new char[strlen(bufferSurname) + 1];
     i = 0;
     while (bufferSurname[i] != '\0') {
@@ -473,7 +438,7 @@ void addUser(User*& users, int& count) {
     std::cout << "Enter age: ";
     std::cin >> newUser.age;
 
-    std::cout << "Enter book ID (0 for skip): ";
+    std::cout << "Enter book ID: ";
     std::cin >> newUser.book_id;
 
     std::cout << "Enter time user: ";
@@ -481,7 +446,7 @@ void addUser(User*& users, int& count) {
     std::cin.ignore(); // Clear the buffer
     std::cin.getline(bufferTimeUser, sizeof(bufferTimeUser));
 
-    // User time_user
+    // Allocate memory for time_user and copy the content
     newUser.time_user = new char[strlen(bufferTimeUser) + 1];
     i = 0;
     while (bufferTimeUser[i] != '\0') {
@@ -490,61 +455,10 @@ void addUser(User*& users, int& count) {
     }
     newUser.time_user[i] = '\0'; // Ensure null-terminated
 
-    User* newUsers;
-    newUsers = new User[++count];
-
-    // Manually copy the contents
-    for (int i = 0; i < count - 1; i++) {
-        newUsers[i] = users[i];
-    }
-
-    newUsers[count - 1] = newUser;
-
-
-    if (count != 1) { delete[] users; };
-
-    users = newUsers;
-    saveUsers(users, count);
+    users[count++] = newUser;
     std::cout << "User added successfully." << std::endl;
 }
 
-void deleteUser(User*& users, int& count, int UserId) {
-    int index = -1;
-    for (int i = 0; i < count; ++i) {
-        if (users[i].id == UserId) {
-            index = i;
-            break;
-        }
-    }
-
-    if (index != -1) {
-        // Free memory for char*
-        delete[] users[index].name;
-        delete[] users[index].surname;
-        delete[] users[index].time_user;
-
-        // Shift remaining users to fill the gap
-        for (int i = index; i < count - 1; ++i) {
-            users[i] = users[i + 1];
-        }
-
-        User* newUsers = new User[--count];
-
-        // Manually copy the contents
-        for (int i = 0; i < count; ++i) {
-            newUsers[i] = users[i];
-        }
-
-        delete[] users;
-        users = newUsers;
-
-        saveUsers(users, count);
-        std::cout << "User deleted successfully." << std::endl;
-    }
-    else {
-        std::cout << "User not found." << std::endl;
-    }
-}
 
 
 
@@ -560,23 +474,6 @@ void displayMenu(int bookCount, int userCount) {
     std::cout << "Select option: ";
 }
 
-void displayTable(Book books[], User users[], int bookCount, int userCount) {
-    std::cout.width(5); std::cout << std::left << "ID";
-    std::cout.width(20); std::cout << std::left << "Reader";
-    std::cout.width(40); std::cout << std::left << "Book now [ID | Title]";
-    std::cout.width(30); std::cout << std::left << "Book time from" << std::endl;
-    for (int i = 0; i < userCount; i++) {
-        std::cout.width(5); std::cout << std::left << users[i].id;
-        std::cout.width(20); std::cout << std::left << users[i].name << " " << users[i].surname << ", " << users[i].age;
-        for (int j = 0; j < bookCount; j++) {
-            if (users[i].id == books[j].id) {
-                std::cout.width(40); std::cout << std::left << books[j].author << "|" << books[j].author;
-
-            }
-        }
-    }
-}
-
 void displayBooks(Book books[], int count) {
     std::cout << std::left << std::setw(5) << "ID" << std::setw(20) << "Title" << std::setw(20) << "Author" << std::setw(10) << "Year" << std::endl;
     for (int i = 0; i < count; ++i) {
@@ -587,11 +484,12 @@ void displayBooks(Book books[], int count) {
 int main() {
 
     //srand(time(0));
-    loader(10); // load logo
+    loader(1); // load logo
 
 
     Book* books = new Book[1];
-    User* users = new User[1];
+
+    User* users = nullptr;
 
     int bookCount = 0;
     int userCount = 0;
@@ -602,8 +500,7 @@ int main() {
     int choice;
     do {
         std::system("cls");
-        //displayBooks(books, bookCount);
-        displayTable(books, users, bookCount, userCount);
+        displayBooks(books, bookCount);
         displayMenu(bookCount, userCount);
         std::cin >> choice;
 
@@ -613,6 +510,7 @@ int main() {
             break;
         case 1:
             addBook(books, bookCount);
+            displayBooks(books, bookCount);
             break;
         case 2:
             addUser(users, userCount);
@@ -631,18 +529,12 @@ int main() {
         }
     } while (choice != 0);
 
-    // Cleanup
+    // Deallocate the memory when you're done
     for (int i = 0; i < bookCount; ++i) {
         delete[] books[i].title;
         delete[] books[i].author;
     }
     delete[] books;
-
-    for (int i = 0; i < userCount; ++i) {
-        delete[] users[i].name;
-        delete[] users[i].surname;
-        delete[] users[i].time_user;
-    }
     delete[] users;
 
     return 0;
