@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #include <fstream>
-#include <iomanip>
 #include <Windows.h>
+#include <time.h>
 
 
 //   DONE
@@ -35,6 +35,26 @@ void loader(int LOGO_len)
     delete[] loader;
 }
 
+int getInput() {
+    char userInput[256];
+
+    //std::cout << "Enter something (press Enter for default): ";
+    std::cin.ignore();
+    std::cin.getline(userInput, 256);
+
+    // Check if the user pressed Enter without entering anything
+    if (std::strlen(userInput) == 0) {
+        return 0;
+    }
+
+    int intValue = 0;
+    for (int i = 0; userInput[i] != '\0'; i++) {
+        intValue = intValue * 10 + (int(userInput[i]));
+    }
+    return intValue; // Convert char array to integer
+    
+}
+
 // BOOK Section
 struct Book {
     int id;
@@ -62,11 +82,6 @@ public:
 
         year = _year;
     }
-    // деструктор тут не надо
-    /*~Book() {
-        delete[] title;
-        delete[] author;
-    }*/
 };
 
 
@@ -153,15 +168,16 @@ bool book_isIdExists(const Book books[], int count, int idToCheck) {
     return false; // ID does not exist
 }
 
-
+// Work
 void addBook(Book*& books, int& count) {
     
     Book newBook;
     
 
     int idInput = 0;
-    std::cout << "Enter book ID (0 for a random ID): ";
-    std::cin >> idInput;
+    std::cout << "Enter book ID (press Enter for a random ID): ";
+    idInput = getInput();
+    //std::cin >> idInput;
     do {
 
         if (idInput != 0) {
@@ -188,7 +204,7 @@ void addBook(Book*& books, int& count) {
     // Gather other book information
     std::cout << "Enter title: ";
     char bufferTitle[256];
-    std::cin.ignore(); // Clear the buffer
+    //std::cin.ignore(); // Clear the buffer
     std::cin.getline(bufferTitle, sizeof(bufferTitle));
 
     newBook.title = new char[strlen(bufferTitle) + 1];
@@ -232,8 +248,30 @@ void addBook(Book*& books, int& count) {
     std::cout << "Book added successfully." << std::endl;
 }
 
+//
+void changeBook(Book*& books, int& count) {
 
-void deleteBook(Book*& books, int& count, int bookId) {
+    
+
+}
+
+void sortBooks(Book*& books, int& count) {
+
+    for (int i =0; i < count; i++) {
+        for (int j = 0; j < count - 1; j++) {
+            if (books[j].id > books[j + 1].id) {
+                std::swap(books[j], books[j + 1]);
+            }
+        }
+    }
+
+}
+
+// Work
+void deleteBook(Book*& books, int& count) {
+    int bookId;
+    std::cout << "Enter the ID of the book to delete: ";
+    std::cin >> bookId;
     int index = -1;
     for (int i = 0; i < count; ++i) {
         if (books[i].id == bookId) {
@@ -308,12 +346,6 @@ public:
         }
         time_user[i] = '\0'; // Ensure null-terminated
     }
-    // деструктор тут не надо
-    /*~User() {
-        delete[] name;
-        delete[] surname;
-        delete[] time_user;
-    }*/
 };
 
 //try work
@@ -356,17 +388,19 @@ void loadUsers(User*& users, int& count) {
             newUser.surname[i] = bufferSurname[i];
         }
         newUser.surname[i] = '\0'; // Ensure null-terminated
-
         // Read age
         file >> newUser.age;
 
+        // Skip the comma after age
+        file.ignore();
         // Read book id
         file >> newUser.book_id;
+        file.ignore();
 
         // Read time
 
         char bufferTime_user[256];
-        file.getline(bufferTime_user, sizeof(bufferTime_user), ',');
+        file.getline(bufferTime_user, sizeof(bufferTime_user));
         newUser.time_user = new char[strlen(bufferTime_user) + 1];
 
         for (i = 0; bufferTime_user[i] != '\0'; ++i) {
@@ -378,8 +412,8 @@ void loadUsers(User*& users, int& count) {
         newUsers = new User[++count];
 
         // Manually copy the contents
-        for (int i = 0; i < count - 1; i++) {
-            newUsers[i] = users[i];
+        for (int j = 0; j < count - 1; j++) {
+            newUsers[j] = users[j];
         }
 
         newUsers[count - 1] = newUser;
@@ -418,8 +452,9 @@ void addUser(User*& users, int& count) {
     User newUser;
 
     int idInput = 0;
-    std::cout << "Enter user ID (0 for a random ID): ";
-    std::cin >> idInput;
+    std::cout << "Enter user ID (press Enter for a random ID): ";
+    idInput = getInput();
+    //std::cin >> idInput;
     do {
 
         if (idInput != 0) {
@@ -445,7 +480,7 @@ void addUser(User*& users, int& count) {
 
     std::cout << "Enter name: ";
     char bufferName[256];
-    std::cin.ignore(); // Clear the buffer
+    //std::cin.ignore(); // Clear the buffer
     std::cin.getline(bufferName, sizeof(bufferName));
 
     // User name
@@ -473,8 +508,9 @@ void addUser(User*& users, int& count) {
     std::cout << "Enter age: ";
     std::cin >> newUser.age;
 
-    std::cout << "Enter book ID (0 for skip): ";
-    std::cin >> newUser.book_id;
+    std::cout << "Enter book ID (press Enter for skip): ";
+    newUser.book_id = getInput();
+    //std::cin >> newUser.book_id;
 
     std::cout << "Enter time user: ";
     char bufferTimeUser[256];
@@ -508,10 +544,25 @@ void addUser(User*& users, int& count) {
     std::cout << "User added successfully." << std::endl;
 }
 
-void deleteUser(User*& users, int& count, int UserId) {
+void sortUsers(User*& users, int& count) {
+
+    for (int i = 0; i < count; i++) {
+        for (int j = 0; j < count - 1; j++) {
+            if (users[j].id > users[j + 1].id) {
+                std::swap(users[j], users[j + 1]);
+            }
+        }
+    }
+
+}
+
+void deleteUser(User*& users, int& count) {
+    int userId;
+    std::cout << "Enter the ID of the book to delete: ";
+    std::cin >> userId;
     int index = -1;
     for (int i = 0; i < count; ++i) {
-        if (users[i].id == UserId) {
+        if (users[i].id == userId) {
             index = i;
             break;
         }
@@ -551,44 +602,87 @@ void deleteUser(User*& users, int& count, int UserId) {
 // DISPLAY Section
 
 void displayMenu(int bookCount, int userCount) {
-    std::cout << "\n0. Exit\n";
+    std::cout << "\n\n\n\n0. Exit\n";
     std::cout << "1. Add Book\n";
-    std::cout << "2. Add User\n";
-    //if (bookCount > 1) { std::cout << "3. Sort books\n"; }
-    //if (userCount > 1) { std::cout << "4. Sort users\n"; }
-    std::cout << "6. Delete book\n\n";
+    if (bookCount > 0) { std::cout << "2. Change book\n"; }
+    if (bookCount > 0) { std::cout << "3. Delete book\n"; }
+    if (bookCount > 1) { std::cout << "4. Sort books\n"; }
+
+    std::cout << "6. Add User\n";
+    if (userCount > 0) { std::cout << "7. Change user\n"; }
+    if (userCount > 0) { std::cout << "8. Delete user\n"; }
+    if (userCount > 1) { std::cout << "9. Sort users\n"; }
+
+    std::cout << "\n\n";
     std::cout << "Select option: ";
 }
 
-void displayTable(Book books[], User users[], int bookCount, int userCount) {
-    std::cout.width(5); std::cout << std::left << "ID";
-    std::cout.width(20); std::cout << std::left << "Reader";
-    std::cout.width(40); std::cout << std::left << "Book now [ID | Title]";
-    std::cout.width(30); std::cout << std::left << "Book time from" << std::endl;
+void displayUserTable(Book books[], User users[], int bookCount, int userCount) {
+    std::cout.width(15);  std::cout << "\033[1m" << std::left << "Readers\033[0m" << "\n";
+    std::cout.fill(char(205));
+    std::cout.width(5+1);  std::cout << std::left << char(201); std::cout.width(20+1); std::cout << std::left << char(203); std::cout.width(40+1); std::cout << std::left << char(203); std::cout.width(30+1); std::cout << std::left << char(203) << char(187) << "\n";
+    std::cout.fill(' ');
+    std::cout << char(186); std::cout.width(5);  std::cout << std::left << "ID";
+    std::cout << char(186); std::cout.width(20); std::cout << std::left << "Reader";
+    std::cout << char(186); std::cout.width(40); std::cout << std::left << "[ID   | Title] Book in hands now";
+    std::cout << char(186); std::cout.width(30); std::cout << std::left << "Book time from" << char(186) << std::endl;
     for (int i = 0; i < userCount; i++) {
+        std::cout << char(186);
         std::cout.width(5); std::cout << std::left << users[i].id;
-        std::cout.width(20); std::cout << std::left << users[i].name << " " << users[i].surname << ", " << users[i].age;
+        std::cout << char(186);
+        std::cout.width(strlen(users[i].name)); std::cout << std::left << users[i].name;
+        std::cout.width(1); std::cout << " ";
+        std::cout.width(strlen(users[i].surname)); std::cout << std::left << users[i].surname;
+        std::cout.width(2); std::cout << ", ";
+        std::cout.width(20 - 3 - strlen(users[i].name) - strlen(users[i].surname)); std::cout << std::left << users[i].age;
+        std::cout << char(186); 
+        std::cout.width(5); std::cout << std::left << users[i].book_id;
+        std::cout.width(3); std::cout << " | ";
+        bool book_check = true;
         for (int j = 0; j < bookCount; j++) {
-            if (users[i].id == books[j].id) {
-                std::cout.width(40); std::cout << std::left << books[j].author << "|" << books[j].author;
-
+            if (users[i].book_id == books[j].id) {
+                if (int(books[j].title) != 0) {
+                    std::cout.width(40 - 3 - 5); std::cout << std::left << books[j].title << char(186);
+                    book_check = false;
+                }
             }
         }
+        if (book_check) {
+            std::cout.width(40 + 1 - 3 - 5); std::cout << std::right << char(186);
+        }
+
+        std::cout.width(30); std::cout << std::left << users[i].time_user;
+        std::cout << char(186) << std::endl;
     }
+    std::cout.fill(char(205));
+    std::cout.width(5 + 1);  std::cout << std::left << char(200); std::cout.width(20 + 1); std::cout << std::left << char(202); std::cout.width(40 + 1); std::cout << std::left << char(202); std::cout.width(30 + 1); std::cout << std::left << char(202) << char(188) << "\n";
+    std::cout.fill(' ');
 }
 
-void displayBooks(Book books[], int count) {
-    std::cout << std::left << std::setw(5) << "ID" << std::setw(20) << "Title" << std::setw(20) << "Author" << std::setw(10) << "Year" << std::endl;
-    for (int i = 0; i < count; ++i) {
-        std::cout << std::left << std::setw(5) << books[i].id << std::setw(20) << books[i].title << std::setw(20) << books[i].author << std::setw(10) << books[i].year << std::endl;
+void displayBookTable(Book books[], User users[], int bookCount, int userCount) {
+    std::cout.width(15);  std::cout << "\033[1m" << std::left << "Books\033[0m\n";
+    std::cout.fill(char(205));
+    std::cout.width(5 + 1);  std::cout << std::left << char(201); std::cout.width(20 + 1); std::cout << std::left << char(203); std::cout.width(40 + 1); std::cout << std::left << char(203); std::cout.width(30 + 1); std::cout << std::left << char(203) << char(187) << "\n";
+    std::cout.fill(' ');
+    std::cout << char(186); std::cout.width(5);  std::cout << std::left << "ID";
+    std::cout << char(186); std::cout.width(20); std::cout << std::left << "Title";
+    std::cout << char(186); std::cout.width(40); std::cout << std::left << "Author";
+    std::cout << char(186); std::cout.width(30); std::cout << std::left << "Year" << char(186) << std::endl;
+    for (int i = 0; i < bookCount; i++) {
+        std::cout << char(186);
+        std::cout.width(5); std::cout << std::left << books[i].id;
+        std::cout << char(186); std::cout.width(20); std::cout << std::left << books[i].title;
+        std::cout << char(186); std::cout.width(40); std::cout << std::left << books[i].author;
+        std::cout << char(186); std::cout.width(30); std::cout << std::left << books[i].year << char(186) << std::endl;
+
     }
+
+    std::cout.fill(char(205));
+    std::cout.width(5 + 1);  std::cout << std::left << char(200); std::cout.width(20 + 1); std::cout << std::left << char(202); std::cout.width(40 + 1); std::cout << std::left << char(202); std::cout.width(30 + 1); std::cout << std::left << char(202) << char(188) << "\n";
+    std::cout.fill(' ');
 }
 
 int main() {
-
-    //srand(time(0));
-    loader(10); // load logo
-
 
     Book* books = new Book[1];
     User* users = new User[1];
@@ -596,14 +690,17 @@ int main() {
     int bookCount = 0;
     int userCount = 0;
 
+    srand(time(0));
+    loader(10); // load logo
+
     loadBooks(books, bookCount);
     loadUsers(users, userCount);
 
     int choice;
     do {
         std::system("cls");
-        //displayBooks(books, bookCount);
-        displayTable(books, users, bookCount, userCount);
+        displayUserTable(books, users, bookCount, userCount);
+        displayBookTable(books, users, bookCount, userCount);
         displayMenu(bookCount, userCount);
         std::cin >> choice;
 
@@ -614,17 +711,33 @@ int main() {
         case 1:
             addBook(books, bookCount);
             break;
-        case 2:
-            addUser(users, userCount);
+        /*case 2:
+            changeBook(books, bookCount);
+            break;*/
+        case 3:
+            std::system("cls");
+            displayBookTable(books, users, bookCount, userCount);
+            deleteBook(books, bookCount);
             break;
-        case 5:
-            loader(15);
+        case 4:
+            sortBooks(books, bookCount);
             break;
         case 6:
-            int bookId;
-            std::cout << "Enter the ID of the book to delete: ";
-            std::cin >> bookId;
-            deleteBook(books, bookCount, bookId);
+            addUser(users, userCount);
+            break;
+        /*case 7:
+            changeUser(users, userCount);
+            break;*/
+        case 8:
+            std::system("cls");
+            displayUserTable(books, users, bookCount, userCount);
+            deleteUser(users, userCount);
+            break;
+        case 9:
+            sortUsers(users, userCount);
+            break;
+        case 99:
+            loader(15);
             break;
         default:
             std::cout << "Invalid choice. Try again." << std::endl;
@@ -644,6 +757,4 @@ int main() {
         delete[] users[i].time_user;
     }
     delete[] users;
-
-    return 0;
 }
